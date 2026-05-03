@@ -1,0 +1,244 @@
+{% extends "base.html" %}
+
+{% block title %}Graduate Dashboard - CareerBridge{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 sidebar">
+            <div class="d-flex flex-column flex-shrink-0 p-3">
+                <h5 class="mb-3">Graduate Dashboard</h5>
+                <ul class="nav nav-pills flex-column mb-auto">
+                    <li class="nav-item">
+                        <a href="{{ url_for('graduate.dashboard') }}" class="nav-link active">
+                            <i class="fas fa-tachometer-alt me-2"></i>Overview
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('graduate.profile') }}" class="nav-link">
+                            <i class="fas fa-user me-2"></i>My Profile
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('graduate.jobs') }}" class="nav-link">
+                            <i class="fas fa-briefcase me-2"></i>Job Matches
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('graduate.applications') }}" class="nav-link">
+                            <i class="fas fa-file-alt me-2"></i>My Applications
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10 ms-sm-auto px-4 py-4">
+            <!-- Welcome Section -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="h3">Welcome back, {{ graduate.full_name }}!</h2>
+                    <p class="text-muted">Here's your career dashboard</p>
+                </div>
+                <div class="text-end">
+                    <div class="badge bg-success">Graduate Account</div>
+                </div>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="row mb-4">
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-primary shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                        Job Matches
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                        {{ applications|length if applications else 0 }}
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-briefcase fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-success shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                        Applications
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                        {{ applications|selectattr('status', 'equalto', 'pending')|list|length }}
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-paper-plane fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-info shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                        Profile Strength
+                                    </div>
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col-auto">
+                                            <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800">
+                                                {% set strength = 50 %}
+                                                {% if graduate.skills %} {% set strength = strength + 25 %} {% endif %}
+                                                {% if graduate.resume_text %} {% set strength = strength + 25 %} {% endif %}
+                                                {{ strength }}%
+                                            </div>
+                                        </div>
+                                        <div class="col">
+                                            <div class="progress progress-sm mr-2">
+                                                <div class="progress-bar bg-info" role="progressbar" 
+                                                     style="width: {{ strength }}%"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-warning shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                        Notifications
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                        {{ notifications|length }}
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-bell fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Applications & Notifications -->
+            <div class="row">
+                <!-- Recent Applications -->
+                <div class="col-lg-8 mb-4">
+                    <div class="card shadow">
+                        <div class="card-header bg-white py-3">
+                            <h6 class="">Recent Applications</h6>
+                        </div>
+                        <div class="card-body">
+                            {% if applications %}
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Job Title</th>
+                                                <th>Company</th>
+                                                <th>Applied</th>
+                                                <th>Status</th>
+                                                <th>Match</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for application in applications[:5] %}
+                                            <tr>
+                                                <td>{{ application.job.title }}</td>
+                                                <td>{{ application.job.employer.company_name }}</td>
+                                                <td>{{ application.applied_at.strftime('%Y-%m-%d') }}</td>
+                                                <td>
+                                                    <span class="badge 
+                                                        {% if application.status == 'pending' %}bg-warning
+                                                        {% elif application.status == 'reviewed' %}bg-info
+                                                        {% elif application.status == 'shortlisted' %}bg-success
+                                                        {% else %}bg-danger{% endif %}">
+                                                        {{ application.status|title }}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    {% if application.match_score %}
+                                                        <span class="match-score">{{ application.match_score }}%</span>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <a href="{{ url_for('graduate.applications') }}" class="btn btn-primary btn-sm">View All Applications</a>
+                            {% else %}
+                                <p class="text-muted">You haven't applied to any jobs yet.</p>
+                                <a href="{{ url_for('graduate.jobs') }}" class="btn btn-primary">Find Jobs</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notifications -->
+                <div class="col-lg-4 mb-4">
+                    <div class="card shadow">
+                        <div class="card-header bg-white py-3">
+                            <h6 class="">Recent Notifications</h6>
+                        </div>
+                        <div class="card-body">
+                            {% if notifications %}
+                                <div class="list-group list-group-flush">
+                                    {% for notification in notifications %}
+                                    <div class="list-group-item px-0 {% if not notification.is_read %}bg-light{% endif %}">
+                                        <div class="d-flex w-100 justify-content-between">
+                                            <h6 class="mb-1">{{ notification.title }}</h6>
+                                            <small>{{ notification.created_at.strftime('%H:%M') }}</small>
+                                        </div>
+                                        <p class="mb-1 small">{{ notification.message }}</p>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <p class="text-muted">No new notifications.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="card shadow mt-4">
+                        <div class="card-header bg-white py-3">
+                            <h6 class="">Quick Actions</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-grid gap-2">
+                                <a href="{{ url_for('graduate.profile') }}" class="btn btn-outline-primary">
+                                    <i class="fas fa-user-edit me-2"></i>Update Profile
+                                </a>
+                                <a href="{{ url_for('graduate.jobs') }}" class="btn btn-outline-success">
+                                    <i class="fas fa-search me-2"></i>Find Jobs
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

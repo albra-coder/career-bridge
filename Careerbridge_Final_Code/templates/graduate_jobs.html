@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+
+{% block title %}Job Matches - CareerBridge{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 sidebar">
+            <div class="d-flex flex-column flex-shrink-0 p-3">
+                <h5 class="mb-3">Graduate Dashboard</h5>
+                <ul class="nav nav-pills flex-column mb-auto">
+                    <li class="nav-item">
+                        <a href="{{ url_for('graduate.dashboard') }}" class="nav-link">
+                            <i class="fas fa-tachometer-alt me-2"></i>Overview
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('graduate.profile') }}" class="nav-link">
+                            <i class="fas fa-user me-2"></i>My Profile
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('graduate.jobs') }}" class="nav-link active">
+                            <i class="fas fa-briefcase me-2"></i>Job Matches
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('graduate.applications') }}" class="nav-link">
+                            <i class="fas fa-file-alt me-2"></i>My Applications
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10 ms-sm-auto px-4 py-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="h3">Job Matches</h2>
+                <div class="text-muted">
+                    AI-powered matches based on your profile
+                </div>
+            </div>
+
+            <!-- Algorithm Info -->
+            <div class="alert alert-info mb-4">
+                <div class="d-flex">
+                    <div class="me-3">
+                        <i class="fas fa-robot fa-2x"></i>
+                    </div>
+                    <div>
+                        <h6 class="alert-heading">AI Matching in Action</h6>
+                        Our algorithms analyze your skills and resume against job requirements using:
+                        <strong>Skill Matching (60%) + Resume Similarity (40%)</strong>
+                    </div>
+                </div>
+            </div>
+
+            {% if matches %}
+            <div class="row">
+                {% for match in matches %}
+                <div class="col-lg-6 mb-4">
+                    <div class="card shadow h-100">
+                        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                            <h5 class="card-title mb-0">{{ match.job.title }}</h5>
+                            <span class="match-score">{{ match.match_score }}% Match</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <h6 class="text-primary mb-1">
+                                    <i class="fas fa-building me-2"></i>{{ match.job.employer.company_name }}
+                                </h6>
+                                <p class="text-muted small mb-2">
+                                    <i class="fas fa-map-marker-alt me-2"></i>{{ match.job.location or 'Location not specified' }}
+                                </p>
+                            </div>
+
+                            <p class="card-text">{{ match.job.description[:200] }}{% if match.job.description|length > 200 %}...{% endif %}</p>
+
+                            <div class="mb-3">
+                                <small class="text-muted">
+                                    <i class="fas fa-money-bill-wave me-2"></i>
+                                    {{ match.job.salary_range or 'Salary not specified' }}
+                                </small>
+                            </div>
+
+                            <!-- Match Breakdown -->
+                            <div class="bg-light p-3 rounded mb-3">
+                                <small class="text-muted d-block mb-1">Match Breakdown:</small>
+                                <div class="d-flex justify-content-between small">
+                                    <span>Skills: {{ match.skill_match }}%</span>
+                                    <span>Resume: {{ match.text_similarity }}%</span>
+                                </div>
+                            </div>
+
+                            <!-- Required Skills -->
+                            {% if match.job.requirements %}
+                            <div class="mb-3">
+                                <small class="text-muted d-block mb-1">Required Skills:</small>
+                                <div class="d-flex flex-wrap gap-1">
+                                    {% set job_skills = match.job.requirements %}
+                                    {% set grad_skills = graduate.skills if graduate.skills else '' %}
+                                    
+                                    {% for skill in job_skills.split(',') %}
+                                        {% set skill_clean = skill.strip() %}
+                                        <span class="badge {% if skill_clean in grad_skills %}bg-success{% else %}bg-secondary{% endif %}">
+                                            {{ skill_clean }}
+                                        </span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="card-footer bg-white">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">
+                                    Posted: {{ match.job.created_at.strftime('%Y-%m-%d') }}
+                                </small>
+                                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" 
+                                        data-bs-target="#applyModal{{ match.job.id }}">
+                                    Apply Now
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Apply Modal -->
+                <div class="modal fade" id="applyModal{{ match.job.id }}" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Apply for {{ match.job.title }}</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <form method="POST" action="{{ url_for('graduate.apply_job', job_id=match.job.id) }}">
+                                <div class="modal-body">
+                                    <div class="alert alert-info">
+                                        <small>
+                                            <strong>Match Score: {{ match.match_score }}%</strong><br>
+                                            Your application will be highlighted to the employer.
+                                        </small>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="cover_letter{{ match.job.id }}" class="form-label">Cover Letter (Optional)</label>
+                                        <textarea class="form-control" id="cover_letter{{ match.job.id }}" 
+                                                  name="cover_letter" rows="4" 
+                                                  placeholder="Why are you interested in this position?"></textarea>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                    <button type="submit" class="btn btn-primary">Submit Application</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                <h4 class="text-muted">No Job Matches Found</h4>
+                <p class="text-muted mb-4">
+                    We couldn't find jobs that match your current profile. 
+                    Try updating your skills and resume for better matches.
+                </p>
+                <a href="{{ url_for('graduate.profile') }}" class="btn btn-primary">
+                    <i class="fas fa-user-edit me-2"></i>Update Profile
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

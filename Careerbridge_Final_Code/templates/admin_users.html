@@ -1,0 +1,285 @@
+{% extends "base.html" %}
+
+{% block title %}User Management - CareerBridge{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 sidebar">
+            <div class="d-flex flex-column flex-shrink-0 p-3">
+                <h5 class="mb-3">Admin Dashboard</h5>
+                <ul class="nav nav-pills flex-column mb-auto">
+                    <li class="nav-item">
+                        <a href="{{ url_for('admin.dashboard') }}" class="nav-link">
+                            <i class="fas fa-tachometer-alt me-2"></i>Overview
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('admin.users') }}" class="nav-link active">
+                            <i class="fas fa-users me-2"></i>User Management
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('admin.jobs') }}" class="nav-link">
+                            <i class="fas fa-briefcase me-2"></i>Job Approvals
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('admin.reports') }}" class="nav-link">
+                            <i class="fas fa-chart-bar me-2"></i>Reports & Analytics
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10 ms-sm-auto px-4 py-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="h3">User Management</h2>
+                <div class="text-muted">
+                    Total Users: {{ users|length }}
+                </div>
+            </div>
+
+            <!-- User Statistics -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card bg-primary text-white">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">{{ users|length }}</h5>
+                            <p class="card-text">Total Users</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-success text-white">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">{{ users|selectattr('user_type', 'equalto', 'graduate')|list|length }}</h5>
+                            <p class="card-text">Graduates</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-info text-white">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">{{ users|selectattr('user_type', 'equalto', 'employer')|list|length }}</h5>
+                            <p class="card-text">Employers</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-warning text-white">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">{{ users|selectattr('is_active', 'equalto', false)|list|length }}</h5>
+                            <p class="card-text">Inactive</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Users Table -->
+            <div class="card shadow">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">All Users</h5>
+                    <div class="btn-group">
+                        <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#filterModal">
+                            <i class="fas fa-filter me-1"></i>Filter
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>User ID</th>
+                                    <th>Email</th>
+                                    <th>Type</th>
+                                    <th>Status</th>
+                                    <th>Registered</th>
+                                    <th>Profile</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for user in users %}
+                                <tr>
+                                    <td><strong>#{{ user.id }}</strong></td>
+                                    <td>
+                                        {{ user.email }}
+                                        {% if user == current_user %}
+                                            <span class="badge bg-info">You</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge 
+                                            {% if user.user_type == 'graduate' %}bg-success
+                                            {% elif user.user_type == 'employer' %}bg-info
+                                            {% else %}bg-dark{% endif %}">
+                                            {{ user.user_type|title }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-{{ 'success' if user.is_active else 'secondary' }}">
+                                            {{ 'Active' if user.is_active else 'Inactive' }}
+                                        </span>
+                                    </td>
+                                    <td>{{ user.created_at.strftime('%Y-%m-%d') }}</td>
+                                    <td>
+                                        {% if user.user_type == 'graduate' and user.graduate_profile %}
+                                            {{ user.graduate_profile.full_name }}
+                                        {% elif user.user_type == 'employer' and user.employer_profile %}
+                                            {{ user.employer_profile.company_name }}
+                                        {% else %}
+                                            <span class="text-muted">Not set</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <button type="button" class="btn btn-outline-info" 
+                                                    data-bs-toggle="modal" 
+                                                    data-bs-target="#userModal{{ user.id }}">
+                                                View
+                                            </button>
+                                            {% if user != current_user %}
+                                            <form method="POST" 
+                                                  action="{{ url_for('admin.toggle_user_active', user_id=user.id) }}"
+                                                  class="d-inline">
+                                                <button type="submit" class="btn btn-{{ 'warning' if user.is_active else 'success' }}">
+                                                    {{ 'Deactivate' if user.is_active else 'Activate' }}
+                                                </button>
+                                            </form>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <!-- User Details Modal -->
+                                <div class="modal fade" id="userModal{{ user.id }}" tabindex="-1">
+                                    <div class="modal-dialog modal-lg">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">User Details: {{ user.email }}</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <h6>Account Information</h6>
+                                                        <p><strong>User ID:</strong> {{ user.id }}</p>
+                                                        <p><strong>Email:</strong> {{ user.email }}</p>
+                                                        <p><strong>Type:</strong> 
+                                                            <span class="badge 
+                                                                {% if user.user_type == 'graduate' %}bg-success
+                                                                {% elif user.user_type == 'employer' %}bg-info
+                                                                {% else %}bg-dark{% endif %}">
+                                                                {{ user.user_type|title }}
+                                                            </span>
+                                                        </p>
+                                                        <p><strong>Status:</strong> 
+                                                            <span class="badge bg-{{ 'success' if user.is_active else 'secondary' }}">
+                                                                {{ 'Active' if user.is_active else 'Inactive' }}
+                                                            </span>
+                                                        </p>
+                                                        <p><strong>Registered:</strong> {{ user.created_at.strftime('%B %d, %Y') }}</p>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <h6>Profile Information</h6>
+                                                        {% if user.user_type == 'graduate' and user.graduate_profile %}
+                                                            <p><strong>Name:</strong> {{ user.graduate_profile.full_name }}</p>
+                                                            <p><strong>Phone:</strong> {{ user.graduate_profile.phone or 'Not provided' }}</p>
+                                                            <p><strong>Education:</strong> {{ user.graduate_profile.education or 'Not provided' }}</p>
+                                                            {% if user.graduate_profile.skills %}
+                                                            <p><strong>Skills:</strong> 
+                                                                {{ user.graduate_profile.skills|replace('["', '')|replace('"]', '')|replace('", "', ', ') }}
+                                                            </p>
+                                                            {% endif %}
+                                                        {% elif user.user_type == 'employer' and user.employer_profile %}
+                                                            <p><strong>Company:</strong> {{ user.employer_profile.company_name }}</p>
+                                                            <p><strong>Industry:</strong> {{ user.employer_profile.industry or 'Not specified' }}</p>
+                                                            <p><strong>Website:</strong> {{ user.employer_profile.website or 'Not provided' }}</p>
+                                                        {% else %}
+                                                            <p class="text-muted">No profile information available.</p>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+
+                                                <!-- User Activity -->
+                                                <div class="mt-4">
+                                                    <h6>Recent Activity</h6>
+                                                    {% if user.admin_logs %}
+                                                        <div class="list-group">
+                                                            {% for log in user.admin_logs[:3] %}
+                                                            <div class="list-group-item">
+                                                                <small>{{ log.action }}</small><br>
+                                                                <small class="text-muted">{{ log.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                                                            </div>
+                                                            {% endfor %}
+                                                        </div>
+                                                    {% else %}
+                                                        <p class="text-muted">No recent activity.</p>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                {% if user != current_user %}
+                                                <form method="POST" 
+                                                      action="{{ url_for('admin.toggle_user_active', user_id=user.id )}}"
+                                                      class="d-inline">
+                                                    <button type="submit" class="btn btn-{{ 'warning' if user.is_active else 'success' }}">
+                                                        {{ 'Deactivate' if user.is_active else 'Activate' }} User
+                                                    </button>
+                                                </form>
+                                                {% endif %}
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filter Modal -->
+<div class="modal fade" id="filterModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Filter Users</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">User Type</label>
+                    <select class="form-select">
+                        <option value="">All Types</option>
+                        <option value="graduate">Graduates</option>
+                        <option value="employer">Employers</option>
+                        <option value="admin">Admins</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Status</label>
+                    <select class="form-select">
+                        <option value="">All Status</option>
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary">Apply Filters</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

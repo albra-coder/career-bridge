@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% block title %}My Profile - CareerBridge{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 sidebar">
+            <div class="d-flex flex-column flex-shrink-0 p-3">
+                <h5 class="mb-3">Graduate Dashboard</h5>
+                <ul class="nav nav-pills flex-column mb-auto">
+                    <li class="nav-item">
+                        <a href="{{ url_for('graduate.dashboard') }}" class="nav-link">
+                            <i class="fas fa-tachometer-alt me-2"></i>Overview
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('graduate.profile') }}" class="nav-link active">
+                            <i class="fas fa-user me-2"></i>My Profile
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('graduate.jobs') }}" class="nav-link">
+                            <i class="fas fa-briefcase me-2"></i>Job Matches
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('graduate.applications') }}" class="nav-link">
+                            <i class="fas fa-file-alt me-2"></i>My Applications
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10 ms-sm-auto px-4 py-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="h3">My Profile</h2>
+                <a href="{{ url_for('graduate.dashboard') }}" class="btn btn-outline-primary">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                </a>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="card shadow">
+                        <div class="card-header bg-white">
+                            <h5 class="card-title mb-0">Profile Information</h5>
+                        </div>
+                        <div class="card-body">
+                            <form method="POST" action="{{ url_for('graduate.profile') }}">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="full_name" class="form-label">Full Name</label>
+                                        <input type="text" class="form-control" id="full_name" name="full_name" 
+                                               value="{{ graduate.full_name or '' }}" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="phone" class="form-label">Phone Number</label>
+                                        <input type="tel" class="form-control" id="phone" name="phone" 
+                                               value="{{ graduate.phone or '' }}">
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="education" class="form-label">Education</label>
+                                    <textarea class="form-control" id="education" name="education" rows="3" 
+                                              placeholder="Your educational background, degrees, certifications...">{{ graduate.education or '' }}</textarea>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="skills" class="form-label">Skills</label>
+                                    <textarea class="form-control" id="skills" name="skills" rows="3" 
+                                              placeholder="Enter your skills separated by commas (e.g., Python, JavaScript, Data Analysis)">
+                                        {% if graduate.skills %}
+                                            {{ graduate.skills|replace('["', '')|replace('"]', '')|replace('", "', ', ') }}
+                                        {% endif %}
+                                    </textarea>
+                                    <div class="form-text">List your technical and soft skills separated by commas.</div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="resume_text" class="form-label">Resume Text</label>
+                                    <textarea class="form-control" id="resume_text" name="resume_text" rows="6" 
+                                              placeholder="Paste your resume text here. This helps our AI algorithms find better job matches for you.">{{ graduate.resume_text or '' }}</textarea>
+                                    <div class="form-text">The more detailed your resume text, the better our matching algorithms can work.</div>
+                                </div>
+
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary btn-lg">Update Profile</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <!-- Profile Completion -->
+                    <div class="card shadow mb-4">
+                        <div class="card-header bg-white">
+                            <h6 class="card-title mb-0">Profile Strength</h6>
+                        </div>
+                        <div class="card-body">
+                            {% set strength = 25 %}
+                            {% if graduate.full_name %} {% set strength = strength + 25 %} {% endif %}
+                            {% if graduate.skills %} {% set strength = strength + 25 %} {% endif %}
+                            {% if graduate.resume_text %} {% set strength = strength + 25 %} {% endif %}
+                            
+                            <div class="text-center mb-3">
+                                <div class="display-6 fw-bold text-primary">{{ strength }}%</div>
+                                <div class="progress mb-2">
+                                    <div class="progress-bar bg-success" role="progressbar" 
+                                         style="width: {{ strength }}%"></div>
+                                </div>
+                                <small class="text-muted">Complete your profile for better job matches</small>
+                            </div>
+
+                            <div class="list-group list-group-flush">
+                                <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                    Basic Information
+                                    <i class="fas fa-{{ 'check text-success' if graduate.full_name else 'times text-danger' }}"></i>
+                                </div>
+                                <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                    Skills Listed
+                                    <i class="fas fa-{{ 'check text-success' if graduate.skills else 'times text-danger' }}"></i>
+                                </div>
+                                <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                    Resume Text
+                                    <i class="fas fa-{{ 'check text-success' if graduate.resume_text else 'times text-danger' }}"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Matching Tips -->
+                    <div class="card shadow">
+                        <div class="card-header bg-white">
+                            <h6 class="card-title mb-0">Matching Tips</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-info">
+                                <h6><i class="fas fa-lightbulb me-2"></i>Improve Your Matches</h6>
+                                <ul class="small mb-0">
+                                    <li>List all relevant technical skills</li>
+                                    <li>Include soft skills and certifications</li>
+                                    <li>Provide detailed resume text</li>
+                                    <li>Keep your education information current</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

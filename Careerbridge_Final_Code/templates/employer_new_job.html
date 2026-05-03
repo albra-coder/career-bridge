@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+
+{% block title %}Post New Job - CareerBridge{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 sidebar">
+            <div class="d-flex flex-column flex-shrink-0 p-3">
+                <h5 class="mb-3">Employer Dashboard</h5>
+                <ul class="nav nav-pills flex-column mb-auto">
+                    <li class="nav-item">
+                        <a href="{{ url_for('employer.dashboard') }}" class="nav-link">
+                            <i class="fas fa-tachometer-alt me-2"></i>Overview
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('employer.profile') }}" class="nav-link">
+                            <i class="fas fa-building me-2"></i>Company Profile
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('employer.jobs') }}" class="nav-link">
+                            <i class="fas fa-briefcase me-2"></i>Job Listings
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('employer.new_job') }}" class="nav-link active">
+                            <i class="fas fa-plus me-2"></i>Post New Job
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10 ms-sm-auto px-4 py-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="h3">Post New Job</h2>
+                <a href="{{ url_for('employer.jobs') }}" class="btn btn-outline-primary">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Jobs
+                </a>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="card shadow">
+                        <div class="card-header bg-white">
+                            <h5 class="card-title mb-0">Job Information</h5>
+                        </div>
+                        <div class="card-body">
+                            <form method="POST" action="{{ url_for('employer.new_job') }}">
+                                <div class="mb-3">
+                                    <label for="title" class="form-label">Job Title *</label>
+                                    <input type="text" class="form-control" id="title" name="title" required
+                                           placeholder="e.g., Senior Frontend Developer">
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="description" class="form-label">Job Description *</label>
+                                    <textarea class="form-control" id="description" name="description" 
+                                              rows="6" required
+                                              placeholder="Describe the role, responsibilities, and what you're looking for in a candidate..."></textarea>
+                                    <div class="form-text">Detailed descriptions help our AI find better matches.</div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="location" class="form-label">Location</label>
+                                        <input type="text" class="form-control" id="location" name="location"
+                                               placeholder="e.g., Remote, New York, NY, etc.">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="salary_range" class="form-label">Salary Range</label>
+                                        <input type="text" class="form-control" id="salary_range" name="salary_range"
+                                               placeholder="e.g., $80,000 - $120,000">
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="job_type" class="form-label">Job Type</label>
+                                        <select class="form-select" id="job_type" name="job_type">
+                                            <option value="">Select job type</option>
+                                            <option value="full-time">Full-time</option>
+                                            <option value="part-time">Part-time</option>
+                                            <option value="internship">Internship</option>
+                                            <option value="contract">Contract</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="requirements" class="form-label">Required Skills *</label>
+                                    <textarea class="form-control" id="requirements" name="requirements" 
+                                              rows="3" required
+                                              placeholder="Enter required skills separated by commas (e.g., JavaScript, React, Node.js, Python)"></textarea>
+                                    <div class="form-text">List all technical and soft skills required for this position.</div>
+                                </div>
+
+                                <div class="alert alert-warning">
+                                    <h6><i class="fas fa-info-circle me-2"></i>Important Note</h6>
+                                    <small class="mb-0">
+                                        All job postings require admin approval before they become visible to candidates. 
+                                        You will be notified once your job is approved.
+                                    </small>
+                                </div>
+
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary btn-lg">Post Job for Approval</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <!-- AI Matching Info -->
+                    <div class="card shadow mb-4">
+                        <div class="card-header bg-white">
+                            <h6 class="card-title mb-0">AI Matching Algorithm</h6>
+                        </div>
+                        <div class="card-body">
+                            <p class="small text-muted">
+                                Our system uses advanced algorithms to match your job with qualified candidates:
+                            </p>
+                            
+                            <div class="mb-3">
+                                <h6 class="small fw-bold">Skill Matching (60%)</h6>
+                                <div class="progress mb-2" style="height: 8px;">
+                                    <div class="progress-bar bg-primary" style="width: 60%"></div>
+                                </div>
+                                <small class="text-muted">Matches candidate skills with your requirements</small>
+                            </div>
+
+                            <div class="mb-3">
+                                <h6 class="small fw-bold">Resume Similarity (40%)</h6>
+                                <div class="progress mb-2" style="height: 8px;">
+                                    <div class="progress-bar bg-success" style="width: 40%"></div>
+                                </div>
+                                <small class="text-muted">Analyzes resume content against job description</small>
+                            </div>
+
+                            <div class="alert alert-info">
+                                <h6 class="small fw-bold">Tips for Better Matches</h6>
+                                <ul class="small mb-0">
+                                    <li>Be specific with required skills</li>
+                                    <li>Write detailed job descriptions</li>
+                                    <li>Include both technical and soft skills</li>
+                                    <li>Specify experience levels when possible</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Current Company -->
+                    <div class="card shadow">
+                        <div class="card-header bg-white">
+                            <h6 class="card-title mb-0">Posting as</h6>
+                        </div>
+                        <div class="card-body text-center">
+                            <h5 class="text-primary">{{ employer.company_name }}</h5>
+                            {% if employer.industry %}
+                                <p class="text-muted small mb-2">{{ employer.industry }}</p>
+                            {% endif %}
+                            {% if employer.company_description %}
+                                <p class="small">{{ employer.company_description[:100] }}{% if employer.company_description|length > 100 %}...{% endif %}</p>
+                            {% endif %}
+                            <a href="{{ url_for('employer.profile') }}" class="btn btn-outline-primary btn-sm">
+                                Update Company Profile
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

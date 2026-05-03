@@ -1,0 +1,226 @@
+<!-- templates/employer_candidates.html - Add debug info -->
+{% extends "base.html" %}
+
+{% block title %}Candidate Matches - CareerBridge{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 sidebar">
+            <div class="d-flex flex-column flex-shrink-0 p-3">
+                <h5 class="mb-3">Employer Dashboard</h5>
+                <ul class="nav nav-pills flex-column mb-auto">
+                    <li class="nav-item">
+                        <a href="{{ url_for('employer.dashboard') }}" class="nav-link">
+                            <i class="fas fa-tachometer-alt me-2"></i>Overview
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('employer.profile') }}" class="nav-link">
+                            <i class="fas fa-building me-2"></i>Company Profile
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('employer.jobs') }}" class="nav-link">
+                            <i class="fas fa-briefcase me-2"></i>Job Listings
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('employer.new_job') }}" class="nav-link">
+                            <i class="fas fa-plus me-2"></i>Post New Job
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10 ms-sm-auto px-4 py-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="h3">Candidate Matches</h2>
+                    <p class="text-muted">AI-matched candidates for: <strong>{{ job.title }}</strong></p>
+                </div>
+                <a href="{{ url_for('employer.applications', job_id=job.id) }}" class="btn btn-outline-primary">
+                    <i class="fas fa-list me-2"></i>View Applications
+                </a>
+            </div>
+
+            <!-- Debug Info (can be removed later) -->
+            <div class="alert alert-info mb-4">
+                <h6><i class="fas fa-info-circle me-2"></i>Matching Information</h6>
+                <p class="mb-1"><strong>Job Requirements:</strong> {{ job.requirements or "No requirements specified" }}</p>
+                <p class="mb-0"><strong>Found Matches:</strong> {{ matches|length }} candidates with 60%+ match score</p>
+            </div>
+
+            <!-- Algorithm Info -->
+            <div class="alert alert-info mb-4">
+                <div class="d-flex">
+                    <div class="me-3">
+                        <i class="fas fa-robot fa-2x"></i>
+                    </div>
+                    <div>
+                        <h6 class="alert-heading">AI Candidate Matching</h6>
+                        Candidates are ranked by match score calculated using:
+                        <strong>Skill Matching (60%) + Resume Similarity (40%)</strong><br>
+                        <small>Only candidates with 60%+ match score are shown.</small>
+                    </div>
+                </div>
+            </div>
+
+            {% if matches %}
+            <div class="row">
+                {% for match in matches %}
+                <div class="col-lg-6 mb-4">
+                    <div class="card shadow h-100">
+                        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                            <h5 class="card-title mb-0">{{ match.graduate.full_name }}</h5>
+                            <span class="match-score">{{ match.match_score }}% Match</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <h6 class="text-primary mb-1">
+                                    <i class="fas fa-graduation-cap me-2"></i>Education
+                                </h6>
+                                <p class="small mb-2">{{ match.graduate.education or 'Not specified' }}</p>
+                            </div>
+
+                            <!-- Skills -->
+                            {% if match.graduate.skills %}
+                            <div class="mb-3">
+                                <h6 class="text-success mb-2">Skills</h6>
+                                <div class="d-flex flex-wrap gap-1">
+                                    {% for skill in match.graduate.skills.split(',') %}
+                                        {% set skill_clean = skill.strip() %}
+                                        <span class="badge bg-primary">{{ skill_clean }}</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            <!-- Match Breakdown -->
+                            <div class="bg-light p-3 rounded mb-3">
+                                <small class="text-muted d-block mb-1">Match Breakdown:</small>
+                                <div class="d-flex justify-content-between small">
+                                    <span>Skills: {{ match.skill_match }}%</span>
+                                    <span>Resume: {{ match.text_similarity }}%</span>
+                                </div>
+                            </div>
+
+                            <!-- Resume Preview -->
+                            {% if match.graduate.resume_text %}
+                            <div class="mb-3">
+                                <h6 class="text-info mb-2">Resume Preview</h6>
+                                <p class="small text-muted">
+                                    {{ match.graduate.resume_text[:150] }}...
+                                    <button class="btn btn-link btn-sm p-0" data-bs-toggle="modal" 
+                                            data-bs-target="#resumeModal{{ match.graduate.id }}">
+                                        Read more
+                                    </button>
+                                </p>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="card-footer bg-white">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">
+                                    Profile updated: {{ match.graduate.updated_at.strftime('%Y-%m-%d') }}
+                                </small>
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-primary btn-sm" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#contactModal{{ match.graduate.id }}">
+                                        Contact
+                                    </button>
+                                    <a href="#" class="btn btn-success btn-sm">Shortlist</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resume Modal -->
+                <div class="modal fade" id="resumeModal{{ match.graduate.id }}" tabindex="-1">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Resume: {{ match.graduate.full_name }}</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="bg-light p-4 rounded">
+                                    <pre class="mb-0" style="white-space: pre-wrap; font-family: inherit;">{{ match.graduate.resume_text or 'No resume text provided.' }}</pre>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact Modal -->
+                <div class="modal fade" id="contactModal{{ match.graduate.id }}" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Contact {{ match.graduate.full_name }}</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="alert alert-info">
+                                    <small>
+                                        <strong>Match Score: {{ match.match_score }}%</strong><br>
+                                        This candidate is highly matched for your position.
+                                    </small>
+                                </div>
+                                
+                                <p><strong>Email:</strong> {{ match.graduate.user.email }}</p>
+                                {% if match.graduate.phone %}
+                                <p><strong>Phone:</strong> {{ match.graduate.phone }}</p>
+                                {% endif %}
+                                
+                                <div class="mb-3">
+                                    <label for="message{{ match.graduate.id }}" class="form-label">Message</label>
+                                    <textarea class="form-control" id="message{{ match.graduate.id }}" rows="4"
+                                              placeholder="Write your message to the candidate..."></textarea>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <button type="button" class="btn btn-primary">Send Message</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                <h4 class="text-muted">No Candidate Matches Found</h4>
+                <p class="text-muted mb-4">
+                    We couldn't find candidates that match your job requirements. 
+                    This could be because:
+                </p>
+                <ul class="text-muted text-start mb-4">
+                    <li>No graduates have skills matching your job requirements</li>
+                    <li>Graduates haven't completed their profiles with skills</li>
+                    <li>The matching threshold (60%) is too high</li>
+                    <li>Job requirements are too specific</li>
+                </ul>
+                <div class="d-flex justify-content-center gap-3">
+                    <a href="{{ url_for('employer.jobs') }}" class="btn btn-primary">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Jobs
+                    </a>
+                    <a href="{{ url_for('employer.new_job') }}" class="btn btn-outline-primary">
+                        <i class="fas fa-edit me-2"></i>Edit Job Requirements
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,364 @@
+{% extends "base.html" %}
+
+{% block title %}Reports & Analytics - CareerBridge{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 sidebar">
+            <div class="d-flex flex-column flex-shrink-0 p-3">
+                <h5 class="mb-3">Admin Dashboard</h5>
+                <ul class="nav nav-pills flex-column mb-auto">
+                    <li class="nav-item">
+                        <a href="{{ url_for('admin.dashboard') }}" class="nav-link">
+                            <i class="fas fa-tachometer-alt me-2"></i>Overview
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('admin.users') }}" class="nav-link">
+                            <i class="fas fa-users me-2"></i>User Management
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('admin.jobs') }}" class="nav-link">
+                            <i class="fas fa-briefcase me-2"></i>Job Approvals
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('admin.reports') }}" class="nav-link active">
+                            <i class="fas fa-chart-bar me-2"></i>Reports & Analytics
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10 ms-sm-auto px-4 py-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="h3">Reports & Analytics</h2>
+                <div class="btn-group">
+                    <a href="{{ url_for('admin.export_reports') }}" class="btn btn-primary" target="_blank">
+                        <i class="fas fa-download me-2"></i>Export Data
+                    </a>
+                </div>
+            </div>
+
+            <!-- Key Metrics -->
+            <div class="row mb-4">
+                <div class="col-md-3 mb-3">
+                    <div class="card bg-primary text-white">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">{{ avg_match_score }}%</h5>
+                            <p class="card-text">Avg. Match Score</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card bg-success text-white">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">{{ job_market_insights.avg_time_to_fill }}</h5>
+                            <p class="card-text">Avg. Days to Hire</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card bg-info text-white">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">{{ algorithm_performance.overall_matching_success }}%</h5>
+                            <p class="card-text">Success Rate</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card bg-warning text-white">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">{{ performance_metrics.user_satisfaction }}%</h5>
+                            <p class="card-text">User Satisfaction</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Employment Trends -->
+                <div class="col-lg-8 mb-4">
+                    <div class="card shadow">
+                        <div class="card-header bg-white">
+                            <h5 class="card-title mb-0">Employment Trends (Last 6 Months)</h5>
+                        </div>
+                        <div class="card-body">
+                            <!-- Simple Chart Visualization -->
+                            <div class="bg-light rounded p-4">
+                                <div class="text-center mb-4">
+                                    <h6>Monthly Applications & Hires</h6>
+                                </div>
+                                {% for i in range(trends_data.labels|length) %}
+                                <div class="row align-items-center mb-2">
+                                    <div class="col-3">
+                                        <small class="text-muted">{{ trends_data.labels[i] }}</small>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="progress" style="height: 20px;">
+                                            <div class="progress-bar bg-primary" style="width: {{ (trends_data.applications[i] / (trends_data.applications|max or 1)) * 100 }}%">
+                                                <small>{{ trends_data.applications[i] }} Apps</small>
+                                            </div>
+                                            <div class="progress-bar bg-success" style="width: {{ (trends_data.hires[i] / (trends_data.applications|max or 1)) * 100 }}%">
+                                                <small>{{ trends_data.hires[i] }} Hires</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-3 text-end">
+                                        <small class="text-muted">
+                                            {{ ((trends_data.hires[i] / trends_data.applications[i]) * 100)|round(1) if trends_data.applications[i] > 0 else 0 }}%
+                                        </small>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            
+                            <!-- Summary Statistics -->
+                            <div class="row text-center mt-4">
+                                <div class="col-md-4">
+                                    <div class="fw-bold text-primary">{{ trends_data.applications|sum }}</div>
+                                    <small class="text-muted">Total Applications</small>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="fw-bold text-success">{{ trends_data.hires|sum }}</div>
+                                    <small class="text-muted">Total Hires</small>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="fw-bold text-info">
+                                        {{ ((trends_data.hires|sum / trends_data.applications|sum) * 100)|round(1) if trends_data.applications|sum > 0 else 0 }}%
+                                    </div>
+                                    <small class="text-muted">Conversion Rate</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Platform Performance -->
+                    <div class="card shadow mt-4">
+                        <div class="card-header bg-white">
+                            <h5 class="card-title mb-0">Platform Performance Metrics</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row text-center">
+                                <div class="col-md-4 mb-3">
+                                    <div class="border rounded p-3">
+                                        <div class="text-primary display-6 fw-bold">{{ performance_metrics.system_uptime }}%</div>
+                                        <small class="text-muted">System Uptime</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <div class="border rounded p-3">
+                                        <div class="text-success display-6 fw-bold">{{ performance_metrics.avg_response_time }}s</div>
+                                        <small class="text-muted">Avg. Response Time</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <div class="border rounded p-3">
+                                        <div class="text-info display-6 fw-bold">{{ performance_metrics.matching_accuracy }}%</div>
+                                        <small class="text-muted">Matching Accuracy</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Analytics Sidebar -->
+                <div class="col-lg-4 mb-4">
+                    <!-- Top Skills -->
+                    <div class="card shadow">
+                        <div class="card-header bg-white">
+                            <h6 class="card-title mb-0">Top Skills in Demand</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="list-group list-group-flush">
+                                {% for skill_data in top_skills %}
+                                <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                    {{ skill_data.skill }}
+                                    <span class="badge bg-primary rounded-pill">{{ skill_data.percentage }}%</span>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Industry Distribution -->
+                    <div class="card shadow mt-4">
+                        <div class="card-header bg-white">
+                            <h6 class="card-title mb-0">Industry Distribution</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="list-group list-group-flush">
+                                {% for industry in industry_distribution %}
+                                <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                    {{ industry.industry }}
+                                    <span class="badge bg-success rounded-pill">{{ industry.percentage }}%</span>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Algorithm Performance -->
+                    <div class="card shadow mt-4">
+                        <div class="card-header bg-white">
+                            <h6 class="card-title mb-0">Algorithm Performance</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <small class="text-muted d-block mb-1">Skill Matching Accuracy</small>
+                                <div class="progress mb-2">
+                                    <div class="progress-bar bg-success" style="width: {{ algorithm_performance.skill_matching_accuracy }}%"></div>
+                                </div>
+                                <small class="text-muted">{{ algorithm_performance.skill_matching_accuracy }}% accuracy</small>
+                            </div>
+                            <div class="mb-3">
+                                <small class="text-muted d-block mb-1">Text Similarity Accuracy</small>
+                                <div class="progress mb-2">
+                                    <div class="progress-bar bg-info" style="width: {{ algorithm_performance.text_similarity_accuracy }}%"></div>
+                                </div>
+                                <small class="text-muted">{{ algorithm_performance.text_similarity_accuracy }}% accuracy</small>
+                            </div>
+                            <div>
+                                <small class="text-muted d-block mb-1">Overall Matching Success</small>
+                                <div class="progress mb-2">
+                                    <div class="progress-bar bg-primary" style="width: {{ algorithm_performance.overall_matching_success }}%"></div>
+                                </div>
+                                <small class="text-muted">{{ algorithm_performance.overall_matching_success }}% success rate</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Reports -->
+            <div class="card shadow">
+                <div class="card-header bg-white">
+                    <h5 class="card-title mb-0">Detailed Analytics</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>User Growth & Activity</h6>
+                            <ul class="list-unstyled">
+                                <li class="mb-2">
+                                    <small class="text-muted">Monthly User Growth: <strong>{{ user_growth.monthly_growth }}%</strong></small>
+                                </li>
+                                <li class="mb-2">
+                                    <small class="text-muted">Graduate Signups: <strong>{{ user_growth.graduate_growth }}%</strong></small>
+                                </li>
+                                <li class="mb-2">
+                                    <small class="text-muted">Employer Signups: <strong>{{ user_growth.employer_growth }}%</strong></small>
+                                </li>
+                                <li>
+                                    <small class="text-muted">Active User Rate: <strong>{{ user_growth.active_user_rate }}%</strong></small>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Job Market Insights</h6>
+                            <ul class="list-unstyled">
+                                <li class="mb-2">
+                                    <small class="text-muted">Average Applications per Job: <strong>{{ job_market_insights.avg_applications_per_job }}</strong></small>
+                                </li>
+                                <li class="mb-2">
+                                    <small class="text-muted">Job Approval Rate: <strong>{{ job_market_insights.job_approval_rate }}%</strong></small>
+                                </li>
+                                <li class="mb-2">
+                                    <small class="text-muted">Average Time to Fill: <strong>{{ job_market_insights.avg_time_to_fill }} days</strong></small>
+                                </li>
+                                <li>
+                                    <small class="text-muted">Employer Satisfaction: <strong>{{ job_market_insights.employer_satisfaction }}%</strong></small>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Platform Statistics Summary -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h6>Platform Statistics Summary</h6>
+                            <div class="row text-center">
+                                <div class="col-md-2 mb-2">
+                                    <div class="border rounded p-2">
+                                        <div class="fw-bold text-primary">{{ total_users }}</div>
+                                        <small class="text-muted">Total Users</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-2 mb-2">
+                                    <div class="border rounded p-2">
+                                        <div class="fw-bold text-success">{{ total_graduates }}</div>
+                                        <small class="text-muted">Graduates</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-2 mb-2">
+                                    <div class="border rounded p-2">
+                                        <div class="fw-bold text-info">{{ total_employers }}</div>
+                                        <small class="text-muted">Employers</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-2 mb-2">
+                                    <div class="border rounded p-2">
+                                        <div class="fw-bold text-warning">{{ total_jobs }}</div>
+                                        <small class="text-muted">Jobs</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-2 mb-2">
+                                    <div class="border rounded p-2">
+                                        <div class="fw-bold text-danger">{{ pending_jobs }}</div>
+                                        <small class="text-muted">Pending Jobs</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-2 mb-2">
+                                    <div class="border rounded p-2">
+                                        <div class="fw-bold text-dark">{{ total_applications }}</div>
+                                        <small class="text-muted">Applications</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Report Actions -->
+                    <div class="mt-4 border-top pt-3">
+                        <div class="row">
+                            <div class="col-md-4 mb-2">
+                                <a href="{{ url_for('admin.export_reports') }}" class="btn btn-outline-primary w-100" target="_blank">
+                                    <i class="fas fa-file-export me-2"></i>Export JSON
+                                </a>
+                            </div>
+                            <div class="col-md-4 mb-2">
+                                <button class="btn btn-outline-success w-100" onclick="window.print()">
+                                    <i class="fas fa-print me-2"></i>Print Report
+                                </button>
+                            </div>
+                            <div class="col-md-4 mb-2">
+                                <button class="btn btn-outline-info w-100" id="refreshReport">
+                                    <i class="fas fa-sync-alt me-2"></i>Refresh Data
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.progress {
+    height: 8px;
+}
+</style>
+
+<script>
+document.getElementById('refreshReport').addEventListener('click', function() {
+    location.reload();
+});
+</script>
+{% endblock %}

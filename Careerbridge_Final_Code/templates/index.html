@@ -1,0 +1,220 @@
+{% extends "base.html" %}
+
+{% block title %}CareerBridge - Home{% endblock %}
+
+{% block content %}
+<!-- Hero Section with Background Image -->
+<section class="hero bg-primary text-white py-5" style="background: linear-gradient(rgba(13, 110, 253, 0.8), rgba(13, 110, 253, 0.9)), url('https://images.unsplash.com/photo-1521737711867-e3b97375f902?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80') center/cover no-repeat;">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-4">AI-Powered Job Matching Platform</h1>
+                <p class="lead mb-4">Connect with the perfect opportunities using advanced matching algorithms. Whether you're a graduate seeking jobs or an employer looking for talent.</p>
+                <div class="d-flex gap-3">
+                    {% if not current_user.is_authenticated %}
+                        <a href="{{ url_for('auth.register') }}" class="btn btn-light btn-lg">Get Started</a>
+                        <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light btn-lg">Login</a>
+                    {% else %}
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-light btn-lg">Go to Dashboard</a>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-lg-6 text-center">
+                <i class="fas fa-network-wired display-1 text-light opacity-75"></i>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col">
+                <h2 class="fw-bold">How It Works</h2>
+                <p class="text-muted">Advanced algorithms powering perfect matches</p>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 border-0">
+                    <div class="card-body text-center">
+                        <i class="fas fa-code-branch text-primary display-6 mb-3"></i>
+                        <h5 class="card-title">Skill Matching</h5>
+                        <p class="card-text text-muted">
+                            Our algorithm calculates precise skill matches between candidates and job requirements using weighted similarity scoring.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 border-0">
+                    <div class="card-body text-center">
+                        <i class="fas fa-file-alt text-success display-6 mb-3"></i>
+                        <h5 class="card-title">Resume Analysis</h5>
+                        <p class="card-text text-muted">
+                            TF-IDF and cosine similarity algorithms analyze resume content against job descriptions for optimal matching.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 border-0">
+                    <div class="card-body text-center">
+                        <i class="fas fa-bell text-warning display-6 mb-3"></i>
+                        <h5 class="card-title">Smart Notifications</h5>
+                        <p class="card-text text-muted">
+                            Receive instant notifications when perfect matches are found or when your application status changes.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Modules Section with Background Image -->
+<section class="py-5 bg-light" style="background: linear-gradient(rgba(248, 249, 250, 0.9), rgba(248, 249, 250, 0.95)), url('https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80') center/cover no-repeat;">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col">
+                <h2 class="fw-bold">Platform Modules</h2>
+                <p class="text-muted">Designed for all users in the employment ecosystem</p>
+            </div>
+        </div>
+        
+        <div class="row">
+            <!-- Graduate Module -->
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="card-title mb-0"><i class="fas fa-user-graduate me-2"></i>Graduate Module</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Create and manage profile</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>View matched job opportunities</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Apply with one click</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Track applications</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Receive smart notifications</li>
+                        </ul>
+                    </div>
+                    <div class="card-footer bg-transparent">
+                        {% if current_user.is_authenticated and current_user.user_type == 'graduate' %}
+                            <a href="{{ url_for('graduate.dashboard') }}" class="btn btn-primary w-100">Access Dashboard</a>
+                        {% else %}
+                            <small class="text-muted">Register as a graduate to access</small>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Employer Module -->
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="card-title mb-0"><i class="fas fa-building me-2"></i>Employer Module</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Register company profile</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Post job listings</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>View matched candidates</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Manage applications</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Track hiring pipeline</li>
+                        </ul>
+                    </div>
+                    <div class="card-footer bg-transparent">
+                        {% if current_user.is_authenticated and current_user.user_type == 'employer' %}
+                            <a href="{{ url_for('employer.dashboard') }}" class="btn btn-success w-100">Access Dashboard</a>
+                        {% else %}
+                            <small class="text-muted">Register as an employer to access</small>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Admin Module -->
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-header bg-dark text-white">
+                        <h5 class="card-title mb-0"><i class="fas fa-cog me-2"></i>Admin Module</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Manage user accounts</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Approve job listings</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Generate analytics</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Monitor platform activity</li>
+                            <li><i class="fas fa-check text-success me-2"></i>System administration</li>
+                        </ul>
+                    </div>
+                    <div class="card-footer bg-transparent">
+                        {% if current_user.is_authenticated and current_user.user_type == 'admin' %}
+                            <a href="{{ url_for('admin.dashboard') }}" class="btn btn-dark w-100">Access Dashboard</a>
+                        {% else %}
+                            <small class="text-muted">Admin access only</small>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Algorithm Section with Background Image -->
+<section class="py-5" style="background: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.95)), url('https://images.unsplash.com/photo-1635070041078-e363dbe005cb?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80') center/cover no-repeat;">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-6">
+                <h3 class="fw-bold mb-4">Advanced Matching Algorithms</h3>
+                <div class="mb-4">
+                    <h5>Skill Matching Algorithm</h5>
+                    <p class="text-muted">
+                        M = |Sg ∩ Sj| / |Sj| × 100<br>
+                        Calculates precise skill overlap between candidate skills and job requirements.
+                    </p>
+                </div>
+                <div>
+                    <h5>TF-IDF & Cosine Similarity</h5>
+                    <p class="text-muted">
+                        Analyzes resume and job description text using natural language processing 
+                        to find semantic similarities beyond keyword matching.
+                    </p>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Real-time Matching Process</h5>
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">1</div>
+                            <div>
+                                <h6 class="mb-0">Profile Analysis</h6>
+                                <small class="text-muted">Skills, education, and resume parsing</small>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">2</div>
+                            <div>
+                                <h6 class="mb-0">Algorithm Processing</h6>
+                                <small class="text-muted">Dual-algorithm matching calculation</small>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <div class="bg-warning text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">3</div>
+                            <div>
+                                <h6 class="mb-0">Match Delivery</h6>
+                                <small class="text-muted">Ranked results with match scores</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
